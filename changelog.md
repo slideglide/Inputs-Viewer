@@ -1,3 +1,8 @@
+# v1.3.2
+
+- Geode v5 support (2.2081)
+- iOS support
+
 # v1.3.1
 
 - Android version from someone's request
