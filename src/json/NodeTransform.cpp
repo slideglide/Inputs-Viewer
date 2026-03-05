@@ -1,5 +1,5 @@
 #include "NodeTransform.hpp"
-#include "Cocos.hpp" // IWYU pragma: keep
+#include "Cocos.hpp"
 
 using namespace geode::prelude;
 

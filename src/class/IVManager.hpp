@@ -4,9 +4,6 @@
 
 GEODE_NS_IV_BEGIN
 
-using RGBASettingFilter = geode::SettingChangedFilterV3;
-using RGBASettingListener = geode::EventListener<RGBASettingFilter>;
-
 class IVManager {
 public:
     IVManager();
@@ -25,13 +22,6 @@ public:
 
     LevelSettings m_settingClassic;
     LevelSettings m_settingPlatformer;
-protected:
-    RGBASettingListener m_backgroundPressListener;
-    RGBASettingListener m_backgroundReleaseListener;
-    RGBASettingListener m_outlinePressListener;
-    RGBASettingListener m_outlineReleaseListener;
-    RGBASettingListener m_textPressListener;
-    RGBASettingListener m_textReleaseListener;
 };
 
 GEODE_NS_IV_END

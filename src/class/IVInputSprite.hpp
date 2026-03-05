@@ -2,6 +2,7 @@
 #include "IVBackgroundSprite.hpp"
 #include <IVEvent.hpp>
 #include <Geode/loader/SettingV3.hpp>
+#include <Geode/loader/Event.hpp>
 
 GEODE_NS_IV_BEGIN
 
@@ -47,7 +48,6 @@ protected:
     cocos2d::CCLabelBMFont* m_playerText = nullptr;
     cocos2d::CCLabelBMFont* m_totalInputsText = nullptr;
     cocos2d::CCLabelBMFont* m_cpsText = nullptr;
-    geode::EventListener<geode::SettingChangedFilterV3> m_cpsSettingListener;
 };
 
 GEODE_NS_IV_END

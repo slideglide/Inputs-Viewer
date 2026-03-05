@@ -9,14 +9,14 @@ BackgroundSprite::BackgroundSprite(ccColor4B const& backgroundColor, ccColor4B c
     : m_backgroundColor(backgroundColor)
     , m_outlineColor(outlineColor)
     , m_textColor(textColor)
-    , m_colorListener(
-        [this](auto) {
-            this->updateBackgroundColorNodes();
-            this->updateOutlineColorNodes();
-            this->updateTextColorNodes();
-        }, IVSettingFilter(SettingEventType::Color)
-    )
-{}
+{
+    m_colorListener = IVSettingEvent(SettingEventType::Color).listen([this]() {
+        this->updateBackgroundColorNodes();
+        this->updateOutlineColorNodes();
+        this->updateTextColorNodes();
+        return true;
+    });
+}
 
 BackgroundSprite::BackgroundSprite()
     : BackgroundSprite(
@@ -25,6 +25,16 @@ BackgroundSprite::BackgroundSprite()
         IVManager::get().m_textReleaseColor
     )
 {}
+
+BackgroundSprite* BackgroundSprite::create(ccColor4B const& backgroundColor, ccColor4B const& outlineColor, ccColor4B const& textColor) {
+    auto ret = new (std::nothrow) BackgroundSprite(backgroundColor, outlineColor, textColor);
+    if (ret && ret->init()) {
+        ret->autorelease();
+        return ret;
+    }
+    delete ret;
+    return nullptr;
+}
 
 BackgroundSprite* BackgroundSprite::create() {
     auto ret = new (std::nothrow) BackgroundSprite;
@@ -88,21 +98,24 @@ void BackgroundSprite::setTextColor(ccColor4B const& color) {
 
 void BackgroundSprite::addBackgroundNode(CCNode* node) {
     if (auto protocol = typeinfo_cast<CCRGBAProtocol*>(node)) {
-        protocol->setColor(m_backgroundColor);
+        protocol->setColor(ccColor3B { m_backgroundColor.get().r, m_backgroundColor.get().g, m_backgroundColor.get().b });
+        protocol->setOpacity(m_backgroundColor.get().a);
         m_backgroundColorNodes.push_back(node);
     }
 }
 
 void BackgroundSprite::addOutlineNode(CCNode* node) {
     if (auto protocol = typeinfo_cast<CCRGBAProtocol*>(node)) {
-        protocol->setColor(m_outlineColor);
+        protocol->setColor(ccColor3B { m_outlineColor.get().r, m_outlineColor.get().g, m_outlineColor.get().b });
+        protocol->setOpacity(m_outlineColor.get().a);
         m_outlineColorNodes.push_back(node);
     }
 }
 
 void BackgroundSprite::addTextNode(CCNode* node) {
     if (auto protocol = typeinfo_cast<CCRGBAProtocol*>(node)) {
-        protocol->setColor(m_textColor);
+        protocol->setColor(ccColor3B { m_textColor.get().r, m_textColor.get().g, m_textColor.get().b });
+        protocol->setOpacity(m_textColor.get().a);
         m_textColorNodes.push_back(node);
     }
 }
@@ -120,31 +133,34 @@ void BackgroundSprite::removeTextNode(CCNode* node) {
 }
 
 void BackgroundSprite::updateBackgroundColorNodes() {
-    if (m_backgroundColorNodes.size() == 0) return;
+    if (m_backgroundColorNodes.empty()) return;
 
     for (auto node : m_backgroundColorNodes) {
         if (auto protocol = typeinfo_cast<CCRGBAProtocol*>(node)) {
-            protocol->setColor(m_backgroundColor);
+            protocol->setColor(ccColor3B { m_backgroundColor.get().r, m_backgroundColor.get().g, m_backgroundColor.get().b });
+            protocol->setOpacity(m_backgroundColor.get().a);
         }
     }
 }
 
 void BackgroundSprite::updateOutlineColorNodes() {
-    if (m_outlineColorNodes.size() == 0) return;
+    if (m_outlineColorNodes.empty()) return;
 
     for (auto node : m_outlineColorNodes) {
         if (auto protocol = typeinfo_cast<CCRGBAProtocol*>(node)) {
-            protocol->setColor(m_outlineColor);
+            protocol->setColor(ccColor3B { m_outlineColor.get().r, m_outlineColor.get().g, m_outlineColor.get().b });
+            protocol->setOpacity(m_outlineColor.get().a);
         }
     }
 }
 
 void BackgroundSprite::updateTextColorNodes() {
-    if (m_textColorNodes.size() == 0) return;
+    if (m_textColorNodes.empty()) return;
 
     for (auto node : m_textColorNodes) {
         if (auto protocol = typeinfo_cast<CCRGBAProtocol*>(node)) {
-            protocol->setColor(m_textColor);
+            protocol->setColor(ccColor3B { m_textColor.get().r, m_textColor.get().g, m_textColor.get().b });
+            protocol->setOpacity(m_textColor.get().a);
         }
     }
 }

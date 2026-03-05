@@ -1,55 +1,64 @@
 #include "IVManager.hpp"
 #include <IVEvent.hpp>
 
-// Initializer order doesn't matter here
-#pragma GCC diagnostic ignored "-Wreorder-ctor"
-
 using namespace geode::prelude;
-
-#define GEODE_IV_CONSTRUCT_COLOR(__col) \
-    m_##__col##PressColor(Mod::get()->getSettingValue<ccColor4B>(#__col "-press-color")), \
-    m_##__col##ReleaseColor(Mod::get()->getSettingValue<ccColor4B>(#__col "-release-color")), \
-    m_##__col##PressListener( \
-        [this](std::shared_ptr<SettingV3> setting) {\
-            using SettingType = SettingTypeForValueType<ccColor4B>::SettingType;\
-            m_##__col##PressColor = std::static_pointer_cast<SettingType>(setting)->getValue();\
-            IVSettingEvent(SettingEventType::Color).post();\
-        }, \
-        RGBASettingFilter(Mod::get()->getID(), #__col "-press-color") \
-    ), \
-    m_##__col##ReleaseListener( \
-        [this](std::shared_ptr<SettingV3> setting) {\
-            using SettingType = SettingTypeForValueType<ccColor4B>::SettingType;\
-            m_##__col##ReleaseColor = std::static_pointer_cast<SettingType>(setting)->getValue();\
-            IVSettingEvent(SettingEventType::Color).post();\
-        }, \
-        RGBASettingFilter(Mod::get()->getID(), #__col "-release-color") \
-    ) \
 
 GEODE_NS_IV_BEGIN
 
 IVManager::IVManager()
-    : m_isInSetting(false)
-    , GEODE_IV_CONSTRUCT_COLOR(background)
-    , GEODE_IV_CONSTRUCT_COLOR(outline)
-    , GEODE_IV_CONSTRUCT_COLOR(text)
-    , m_settingClassic(
-        Mod::get()->getSavedValue<LevelSettings>("classic", {
-            .p1Transform = IVManager::getDefaultP1Transform(),
-            .p2Transform = IVManager::getDefaultP2Transform()
-        })
-    )
-    , m_settingPlatformer(
-        Mod::get()->getSavedValue<LevelSettings>("platformer", {
-            .p1Transform = IVManager::getDefaultP1Transform(),
-            .p2Transform = IVManager::getDefaultP2Transform()
-        })
-    )
-{}
+: m_isInSetting(false)
+, m_backgroundPressColor(Mod::get()->getSettingValue<ccColor4B>("background-press-color"))
+, m_backgroundReleaseColor(Mod::get()->getSettingValue<ccColor4B>("background-release-color"))
+, m_outlinePressColor(Mod::get()->getSettingValue<ccColor4B>("outline-press-color"))
+, m_outlineReleaseColor(Mod::get()->getSettingValue<ccColor4B>("outline-release-color"))
+, m_textPressColor(Mod::get()->getSettingValue<ccColor4B>("text-press-color"))
+, m_textReleaseColor(Mod::get()->getSettingValue<ccColor4B>("text-release-color"))
+, m_settingClassic(
+    Mod::get()->getSavedValue<LevelSettings>("classic", {
+        .p1Transform = IVManager::getDefaultP1Transform(),
+        .p2Transform = IVManager::getDefaultP2Transform()
+    })
+)
+, m_settingPlatformer(
+    Mod::get()->getSavedValue<LevelSettings>("platformer", {
+        .p1Transform = IVManager::getDefaultP1Transform(),
+        .p2Transform = IVManager::getDefaultP2Transform()
+    })
+)
+{
+    geode::listenForSettingChanges<ccColor4B>("background-press-color", [this](ccColor4B color) {
+        m_backgroundPressColor = color;
+        IVSettingEvent(SettingEventType::Color).send();
+    });
+    
+    geode::listenForSettingChanges<ccColor4B>("background-release-color", [this](ccColor4B color) {
+        m_backgroundReleaseColor = color;
+        IVSettingEvent(SettingEventType::Color).send();
+    });
+    
+    geode::listenForSettingChanges<ccColor4B>("outline-press-color", [this](ccColor4B color) {
+        m_outlinePressColor = color;
+        IVSettingEvent(SettingEventType::Color).send();
+    });
+    
+    geode::listenForSettingChanges<ccColor4B>("outline-release-color", [this](ccColor4B color) {
+        m_outlineReleaseColor = color;
+        IVSettingEvent(SettingEventType::Color).send();
+    });
+    
+    geode::listenForSettingChanges<ccColor4B>("text-press-color", [this](ccColor4B color) {
+        m_textPressColor = color;
+        IVSettingEvent(SettingEventType::Color).send();
+    });
+    
+    geode::listenForSettingChanges<ccColor4B>("text-release-color", [this](ccColor4B color) {
+        m_textReleaseColor = color;
+        IVSettingEvent(SettingEventType::Color).send();
+    });
+}
 
 IVManager& IVManager::get() {
     static auto inst = std::make_unique<IVManager>();
-
     return *inst;
 }
 
@@ -57,7 +66,7 @@ NodeTransform IVManager::getDefaultP1Transform() {
     auto winSize = CCDirector::get()->getWinSize();
     auto maxWidth = winSize.width * 0.5f;
     auto maxHeight = winSize.height * 0.5f;
-
+    
     return {
         .position = {-maxWidth * 0.5f, -maxHeight + 4.f},
         .scale = 1.f
@@ -68,7 +77,7 @@ NodeTransform IVManager::getDefaultP2Transform() {
     auto winSize = CCDirector::get()->getWinSize();
     auto maxWidth = winSize.width * 0.5f;
     auto maxHeight = winSize.height * 0.5f;
-
+    
     return {
         .position = {maxWidth * 0.5f, -maxHeight + 4.f},
         .scale = 1.f
@@ -93,16 +102,16 @@ $on_mod(Loaded) {
     if (version == 0) {
         IVManager::get().m_settingClassic.p1Transform = Mod::get()->getSavedValue<NodeTransform>("p1-display");
         IVManager::get().m_settingPlatformer.p1Transform = Mod::get()->getSavedValue<NodeTransform>("p1-display");
-
+        
         IVManager::get().m_settingClassic.p2Transform = Mod::get()->getSavedValue<NodeTransform>("p2-display");
         IVManager::get().m_settingPlatformer.p2Transform = Mod::get()->getSavedValue<NodeTransform>("p2-display");
-
+        
         IVManager::get().m_settingClassic.showTotalInputs = Mod::get()->getSavedValue<bool>("show-total-inputs");
         IVManager::get().m_settingPlatformer.showTotalInputs = Mod::get()->getSavedValue<bool>("show-total-inputs");
-
+        
         IVManager::get().m_settingClassic.showCPS = Mod::get()->getSavedValue<bool>("show-cps");
         IVManager::get().m_settingPlatformer.showCPS = Mod::get()->getSavedValue<bool>("show-cps");
-
+        
         if (Mod::get()->getSavedValue<bool>("minimal-if-non-platformer")) {
             IVManager::get().m_settingClassic.hideLeftRight = true;
             IVManager::get().m_settingPlatformer.hideLeftRight = false;

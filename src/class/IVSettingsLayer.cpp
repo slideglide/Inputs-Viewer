@@ -14,7 +14,7 @@ SettingsLayer::SettingsLayer(LevelSettingsType levelType)
 
 SettingsLayer* SettingsLayer::create(LevelSettingsType levelType, bool enableGeodeSettingButton) {
     auto ret = new (std::nothrow) SettingsLayer(levelType);
-    if (ret && ret->initAnchored(350.f, 260.f, enableGeodeSettingButton, "square02_001.png")) {
+    if (ret && ret->init(enableGeodeSettingButton)) {
         ret->autorelease();
         return ret;
     }
@@ -22,7 +22,8 @@ SettingsLayer* SettingsLayer::create(LevelSettingsType levelType, bool enableGeo
     return nullptr;
 }
 
-bool SettingsLayer::setup(bool enableGeodeSettingButton) {
+bool SettingsLayer::init(bool enableGeodeSettingButton) {
+    if (!Popup::init(350.f, 260.f, "square02_001.png")) return false;
     IVManager::get().m_isInSetting = true;
     this->setTitle("Inputs Viewer Config");
     this->setColor({127, 127, 127});
@@ -116,7 +117,7 @@ CCMenuItemToggler* SettingsLayer::createCheckbox(bool LevelSettings::* member, c
     auto checkbox = CCMenuItemExt::createTogglerWithStandardSprites(0.7f, [this, member, postEvent](CCMenuItemToggler* btn) {
         m_currentSetting.get().*member = !btn->isToggled();
         if (postEvent) {
-            IVSettingEvent(*postEvent).post();
+            IVSettingEvent(*postEvent).send();
         }
     });
     m_buttonMenu->addChildAtPosition(checkbox, anchor, offset);
@@ -144,10 +145,10 @@ void SettingsLayer::onModSettings(CCObject*) {
     openSettingsPopup(Mod::get(), false);
 }
 
-void SettingsLayer::onExit() {
+void SettingsLayer::onClose() {
     IVManager::get().m_isInSetting = false;
-    IVSettingEvent(SettingEventType::RefreshView).post();
-    Popup::onExit();
+    IVSettingEvent(SettingEventType::RefreshView).send();
+    Popup::onClose(nullptr);
 }
 
 GEODE_NS_IV_END

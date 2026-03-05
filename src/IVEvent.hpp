@@ -1,31 +1,28 @@
 #pragma once
+#include <Geode/loader/Event.hpp>
+#include "macros.hpp"
 
 GEODE_NS_IV_BEGIN
 
 enum class SettingEventType {
     Color,
+    General,
     KeyAppearance,
-    RefreshView,
+    RefreshView
 };
 
-class IVSettingEvent : public geode::Event {
-public:
-    IVSettingEvent(SettingEventType type);
-    SettingEventType getType() const noexcept;
+class IVSettingEvent : public geode::GlobalEvent<
+    IVSettingEvent, 
+    bool(),
+    SettingEventType
+> {
 protected:
     SettingEventType m_type;
-};
 
-class IVSettingFilter : public geode::EventFilter<IVSettingEvent> {
 public:
-    IVSettingFilter();
-    IVSettingFilter(std::nullopt_t);
-    IVSettingFilter(SettingEventType type);
-public:
-    using Callback = void(SettingEventType);
-    geode::ListenerResult handle(std::function<Callback> func, IVSettingEvent* event);
-protected:
-    std::optional<SettingEventType> m_type;
+    IVSettingEvent(SettingEventType type);
+    IVSettingEvent();
+    SettingEventType getType() const noexcept;
 };
 
 GEODE_NS_IV_END

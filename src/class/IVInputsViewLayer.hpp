@@ -21,7 +21,7 @@ public:
     std::reference_wrapper<LevelSettings const> m_currentSetting;
     PlayerInputNode* m_p1InputNode = nullptr;
     PlayerInputNode* m_p2InputNode = nullptr;
-    geode::EventListener<IVSettingFilter> m_settingListener;
+    geode::comm::ListenerHandle m_settingListener;
 };
 
 GEODE_NS_IV_END

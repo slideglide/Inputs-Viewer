@@ -7,7 +7,12 @@ GEODE_NS_IV_BEGIN
 
 InputsViewLayer::InputsViewLayer(LevelSettingsType type)
     : m_currentSetting(IVManager::get().getLevelSettings(type))
-    , m_settingListener(this, &InputsViewLayer::onSettingEvent, IVSettingFilter(SettingEventType::RefreshView)) {}
+{
+    m_settingListener = IVSettingEvent(SettingEventType::RefreshView).listen([this]() {
+        this->refreshDisplay();
+        return true;
+    });
+}
 
 InputsViewLayer* InputsViewLayer::create(LevelSettingsType type) {
     auto ret = new (std::nothrow) InputsViewLayer(type);
